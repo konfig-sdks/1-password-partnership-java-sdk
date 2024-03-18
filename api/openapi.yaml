@@ -1,0 +1,693 @@
+openapi: 3.0.0
+info:
+  contact:
+    email: partners@1password.com
+    name: 1Password Partnerships
+    url: https://www.1password.partners/English/
+  description: "Trusted by more than 100,000 businesses to protect their data, 1Password\
+    \ gives you complete control over passwords and other sensitive business information.\
+    \ \n\nAs an integral layer of the Identity and Access Management (IAM) stack,\
+    \ 1Password protects all employee accounts – even those you aren't aware of. Give\
+    \ employees secure access to any app or service and safely share everything you\
+    \ need to work together – including logins, documents, credit cards, and more\
+    \ – while keeping everything else private.\n\n1Password is easy to deploy and\
+    \ integrates with Azure AD, Okta, OneLogin, and Slack, so you can automatically\
+    \ provision employees using the systems you already trust. It's simple to manage\
+    \ and fits seamlessly into your team's workflow, so you can secure your business\
+    \ without compromising productivity."
+  title: 1Password Partnership API
+  version: 2.0.0
+  x-konfig-has-globally-required-security: true
+servers:
+- url: https://billing.b5test.eu
+- url: https://billing.1password.com
+security:
+- bearerAuth: []
+tags:
+- name: Account
+paths:
+  /api/v1/partners/accounts:
+    post:
+      description: Begins provisioning process for a new partner associated 1Password
+        account.
+      operationId: Account_beginProvisioningProcess
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Creating an Individual account on b5test.com:
+                value:
+                  customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                  account_type: I
+                  domain: b5test.com
+              Creating a Family account on b5test.eu:
+                value:
+                  customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                  account_type: F
+                  domain: b5test.eu
+              Creating an Individual account with a specified ends_at field:
+                value:
+                  customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                  account_type: I
+                  domain: b5test.com
+                  ends_at: 2050-02-05T13:00:00.000Z
+              Creating a Family account with a specified ends_at and timezone:
+                value:
+                  customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                  account_type: F
+                  domain: b5test.com
+                  ends_at: 2050-02-05T18:00:00.000Z
+            schema:
+              $ref: '#/components/schemas/CreatePartnerAccountRequest'
+        description: Request to initialize a partner account.
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              examples:
+                Creating an Individual account without an ends_at date:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: entitled
+                    deployed_members: 0
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:55:58.000Z
+                    ends_at: null
+                Creating a Family account with an ends_at date:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: F
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: entitled
+                    deployed_members: 0
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:55:58.000Z
+                    ends_at: 2050-02-05T13:00:00.000Z
+                Creating an Individual account with an ends_at date with specified time zone:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: entitled
+                    deployed_members: 0
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:55:58.000Z
+                    ends_at: 2050-02-05T18:00:00.000Z
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: An Account object is returned upon successful initialization
+            of a partner account.
+          headers:
+            location:
+              description: Location of the newly created resource.
+              explode: false
+              schema:
+                example: /api/v1/partners/accounts/aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                type: string
+                x-konfig-original-example: /api/v1/partners/accounts/aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                x-konfig-generated-schema: konfig-generated-schema-paths--api-v1-partners-accounts-post-responses-201-headers-location-schema
+              style: simple
+        "400":
+          content:
+            application/json:
+              example:
+                description: Account type B is not supported.
+                code: 400
+                error: bad_request
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Account type B is not supported.
+                code: 400
+                error: bad_request
+          description: Returned on bad requests.
+          x-do-not-generate: true
+        "403":
+          content:
+            application/json:
+              example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+          description: Returned when the Authorization header is missing or an invalid
+            token is specified.
+          x-do-not-generate: true
+        "404":
+          content:
+            application/json:
+              example:
+                description: Domain not found.
+                code: 404
+                error: not_found
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Domain not found.
+                code: 404
+                error: not_found
+          description: Returned when a resource or dependency of a resource is not
+            found.
+          x-do-not-generate: true
+        "500":
+          content:
+            application/json:
+              example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+          description: Returned on unexpected errors.
+          x-do-not-generate: true
+      tags:
+      - Account
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-post--api-v1-partners-accounts
+      x-content-type: application/json
+      x-accepts: application/json
+  /api/v1/partners/accounts/{customer_account_uid}:
+    delete:
+      description: Removes an account from the partnership domain.
+      operationId: Account_removeFromPartnership
+      parameters:
+      - description: Unique ID of partner_account to delete.
+        explode: false
+        in: path
+        name: customer_account_uid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "204":
+          description: Returned upon successful deactivation of a partnership account.
+        "403":
+          content:
+            application/json:
+              example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+          description: Returned when the Authorization header is missing or an invalid
+            token is specified.
+          x-do-not-generate: true
+        "404":
+          content:
+            application/json:
+              example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+          description: Returned when a resource or dependency of a resource is not
+            found.
+          x-do-not-generate: true
+        "500":
+          content:
+            application/json:
+              example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+          description: Returned on unexpected errors.
+          x-do-not-generate: true
+      tags:
+      - Account
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-delete--api-v1-partners-accounts-customer_account_uid
+      x-accepts: application/json
+    get:
+      description: Returns an account based on an UID.
+      operationId: Account_getByUid
+      parameters:
+      - description: Unique ID of an account to retrieve.
+        explode: false
+        in: path
+        name: customer_account_uid
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                Getting an account without a specified ends_at time:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: provisioned
+                    deployed_members: 1
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:58:22.000Z
+                    ends_at: null
+                Getting an account with a specified ends_at time:
+                  value:
+                    customer_account_uid: aabee51b-0b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: provisioned
+                    deployed_members: 1
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:58:22.000Z
+                    ends_at: 2030-01-23T15:58:22.000Z
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: An Account object is returned upon successful retrieval of
+            a partner account.
+        "403":
+          content:
+            application/json:
+              example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+          description: Returned when the Authorization header is missing or an invalid
+            token is specified.
+          x-do-not-generate: true
+        "404":
+          content:
+            application/json:
+              example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+          description: Returned when a resource or dependency of a resource is not
+            found.
+          x-do-not-generate: true
+        "410":
+          content:
+            application/json:
+              example:
+                description: The requested account is gone.
+                code: 410
+                error: gone
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: The requested account is gone.
+                code: 410
+                error: gone
+          description: Returned when a resource has been removed.
+          x-do-not-generate: true
+        "500":
+          content:
+            application/json:
+              example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+          description: Returned on unexpected errors.
+          x-do-not-generate: true
+      tags:
+      - Account
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-get--api-v1-partners-accounts-customer_account_uid
+      x-accepts: application/json
+    patch:
+      description: Updates the ends_at attribute of an account based on an UID.
+      operationId: Account_updateEndsAtByUid
+      parameters:
+      - description: Unique ID of partner_account to update.
+        explode: false
+        in: path
+        name: customer_account_uid
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            examples:
+              Setting an ends_at time:
+                value:
+                  ends_at: 2030-01-23T15:55:58.000Z
+              Removing an ends_at time with empty string:
+                value:
+                  ends_at: ""
+              Removing an ends_at time with NULL:
+                value:
+                  ends_at: null
+            schema:
+              $ref: '#/components/schemas/UpdatePartnerAccountRequest'
+        description: Request to update the ends_at attribute of a partner account.
+      responses:
+        "200":
+          content:
+            application/json:
+              examples:
+                Setting an ends_at time:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: provisioned
+                    deployed_members: 1
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:58:22.000Z
+                    ends_at: 2030-01-23T15:55:58.000Z
+                Removing an ends_at time:
+                  value:
+                    customer_account_uid: aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+                    account_type: I
+                    activation_token: PNS-DEFG1234
+                    domain: b5test.com
+                    status: provisioned
+                    deployed_members: 1
+                    created_at: 2023-01-23T15:55:58.000Z
+                    updated_at: 2023-01-23T15:58:22.000Z
+                    ends_at: null
+              schema:
+                $ref: '#/components/schemas/Account'
+          description: An Account object is returned upon successful update of a partner
+            account.
+        "400":
+          content:
+            application/json:
+              examples:
+                Invalid ends_at date format:
+                  value:
+                    description: "Invalid ends_at date format - it must adhere to\
+                      \ RFC-3339, e.g. 2006-01-02T15:04:05-07:00."
+                    code: 400
+                    error: bad_request
+                ends_at date in the past:
+                  value:
+                    description: Invalid ends_at date - it cannot be in the past.
+                    code: 400
+                    error: bad_request
+                Deactivated partner cannot be modified:
+                  value:
+                    description: Invalid account - partner account deleted.
+                    code: 400
+                    error: bad_request
+              schema:
+                $ref: '#/components/schemas/Error'
+          description: Returned upon validation failures
+          x-do-not-generate: true
+        "403":
+          content:
+            application/json:
+              example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Invalid auth token.
+                code: 403
+                error: forbidden
+          description: Returned when the Authorization header is missing or an invalid
+            token is specified.
+          x-do-not-generate: true
+        "404":
+          content:
+            application/json:
+              example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Failed to find the requested account.
+                code: 404
+                error: not_found
+          description: Returned when a resource or dependency of a resource is not
+            found.
+          x-do-not-generate: true
+        "500":
+          content:
+            application/json:
+              example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+              schema:
+                $ref: '#/components/schemas/Error'
+              x-konfig-original-example:
+                description: Internal server error
+                code: 500
+                error: internal_server_error
+          description: Returned on unexpected errors.
+          x-do-not-generate: true
+      tags:
+      - Account
+      x-konfig-operation-can-have-single-parameter: true
+      x-konfig-single-parameter-schema: konfig-generated-schema-single-parameter-schema-patch--api-v1-partners-accounts-customer_account_uid
+      x-content-type: application/json
+      x-accepts: application/json
+components:
+  schemas:
+    CreatePartnerAccountRequest:
+      example:
+        customer_account_uid: customer_account_uid
+        account_type: account_type
+        domain: domain
+        ends_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        customer_account_uid:
+          description: A unique identifier for the end user's account to be provisioned.
+            It can be up to 80 chars long and consist of alphanumeric characters and
+            hyphens.
+          type: string
+        account_type:
+          description: "Specifies the type of 1Password account plan to provision\
+            \ - 'I' for Individual, or 'F' for family."
+          type: string
+        domain:
+          description: "Specifies the 1Password domain to provision the account for.\
+            \ For testing it can be one of 'b5test.com', 'b5test.ca', or 'b5test.eu'.\
+            \ For production, it can be one of '1password.com', '1password.ca', or\
+            \ '1password.eu'. Note that domains can only be used after promotions\
+            \ have been created for a given partnership in the specific domain."
+          type: string
+        ends_at:
+          description: "Specifies when the 1Password account will be frozen, formatted\
+            \ in RFC-3339."
+          format: date-time
+          type: string
+      required:
+      - account_type
+      - customer_account_uid
+      - domain
+      type: object
+    UpdatePartnerAccountRequest:
+      example:
+        ends_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        ends_at:
+          description: "Specifies when the 1Password account will be frozen, formatted\
+            \ in RFC-3339."
+          format: date-time
+          type: string
+      required:
+      - ends_at
+      type: object
+    Account:
+      example:
+        customer_account_uid: customer_account_uid
+        activation_token: activation_token
+        account_type: account_type
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        domain: domain
+        created_at: 2000-01-23T04:56:07.000+00:00
+        ends_at: 2000-01-23T04:56:07.000+00:00
+        deployed_members: 0
+        status: status
+      properties:
+        customer_account_uid:
+          description: The unique identifier for the end user's account. It can be
+            up to 80 chars long and consist of alphanumeric characters and hyphens.
+          type: string
+        account_type:
+          description: "The current type of the 1Password account - 'I' for Individual,\
+            \ or 'F' for family."
+          type: string
+        activation_token:
+          description: "The activation token is a coupon code to link a new or existing\
+            \ 1Password account to a partnership promotion. For example, it can be\
+            \ used for 1Password account creation at https://start.{{1password_domain}}/partnership/redeem?t={{account_type}}&c={{activation_token}}\
+            \ during end-user signup."
+          type: string
+        domain:
+          description: "The 1Password domain for which the account was provisioned\
+            \ for. For testing domains, it can be one of 'b5test.com', 'b5test.ca',\
+            \ or 'b5test.eu'. For production, it can be one of '1password.com', '1password.ca',\
+            \ or '1password.eu'."
+          type: string
+        status:
+          description: "The provisioning status of the partner account. It can be\
+            \ either 'entitled' for accounts that have been initialized but have not\
+            \ completed 1Password signup, or 'provisioned' for accounts that have\
+            \ completed the 1Password signup process."
+          type: string
+        deployed_members:
+          description: The number of provisioned users for the 1Password account.
+          type: integer
+        created_at:
+          description: "The timestamp of when the partnership account was created,\
+            \ formatted in RFC-3339."
+          format: date-time
+          type: string
+        updated_at:
+          description: "The timestamp of when the partner account was last updated,\
+            \ formatted in RFC-3339. This field will be updated during account status\
+            \ changes."
+          format: date-time
+          type: string
+        ends_at:
+          description: "The timestamp of when the partner account will be frozen,\
+            \ formatted in RFC-3339."
+          format: date-time
+          type: string
+      type: object
+      x-konfig-is-used-in-successful-response: true
+    Error:
+      properties:
+        description:
+          description: A description of the error.
+          type: string
+        code:
+          description: The HTTP response code of the error.
+          type: integer
+        error:
+          description: A machine parsable string that represents the code.
+          type: string
+      type: object
+      x-konfig-is-used-in-non-successful-response: true
+      x-do-not-generate: true
+    konfig-generated-schema-paths--api-v1-partners-accounts-post-responses-201-headers-location-schema:
+      example: /api/v1/partners/accounts/aabee51b-0be2-4a0c-aa39-5bbcbb903d1b
+      type: string
+      x-do-not-generate: true
+    konfig-generated-schema-single-parameter-schema-post--api-v1-partners-accounts:
+      properties:
+        customer_account_uid:
+          description: A unique identifier for the end user's account to be provisioned.
+            It can be up to 80 chars long and consist of alphanumeric characters and
+            hyphens.
+          type: string
+        account_type:
+          description: "Specifies the type of 1Password account plan to provision\
+            \ - 'I' for Individual, or 'F' for family."
+          type: string
+        domain:
+          description: "Specifies the 1Password domain to provision the account for.\
+            \ For testing it can be one of 'b5test.com', 'b5test.ca', or 'b5test.eu'.\
+            \ For production, it can be one of '1password.com', '1password.ca', or\
+            \ '1password.eu'. Note that domains can only be used after promotions\
+            \ have been created for a given partnership in the specific domain."
+          type: string
+        ends_at:
+          description: "Specifies when the 1Password account will be frozen, formatted\
+            \ in RFC-3339."
+          format: date-time
+          type: string
+      required:
+      - account_type
+      - customer_account_uid
+      - domain
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter: []
+    konfig-generated-schema-single-parameter-schema-delete--api-v1-partners-accounts-customer_account_uid:
+      properties:
+        customer_account_uid:
+          type: string
+      required:
+      - customer_account_uid
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - customer_account_uid
+    konfig-generated-schema-single-parameter-schema-get--api-v1-partners-accounts-customer_account_uid:
+      properties:
+        customer_account_uid:
+          type: string
+      required:
+      - customer_account_uid
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - customer_account_uid
+    konfig-generated-schema-single-parameter-schema-patch--api-v1-partners-accounts-customer_account_uid:
+      properties:
+        customer_account_uid:
+          type: string
+        ends_at:
+          description: "Specifies when the 1Password account will be frozen, formatted\
+            \ in RFC-3339."
+          format: date-time
+          type: string
+      required:
+      - customer_account_uid
+      - ends_at
+      type: object
+      x-do-not-generate: true
+      x-konfig-is-parameter:
+      - customer_account_uid
+  securitySchemes:
+    bearerAuth:
+      scheme: bearer
+      type: http
+      x-konfig-globally-required-security: true
+
